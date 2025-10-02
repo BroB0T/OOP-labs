@@ -1,5 +1,4 @@
 #include <iostream>
-#include <vector>
 #include <stdexcept>
 #include <iomanip>
 
@@ -8,28 +7,66 @@ using namespace std;
 
 class Vector
 {
-private: 
-	vector<double> data;
+private:
+	double* data;
+	int size;
 
 public:
-	Vector(int size) 
+	Vector()
 	{
-		data = vector<double>(size);
+		data = new double[0];
+	}
+
+	Vector(int _size) 
+	{
+		size = _size;
+		data = new double[size];
+	}
+
+	Vector(const Vector& other)
+	{
+		size = other.size;
+		data = new double[size];
+		for (int i = 0; i < size; i++)
+		{
+			data[i] = other.data[i];
+		}
+	}
+
+	Vector& operator=(const Vector& other) 
+	{
+		if (this == &other) return *this;
+
+		delete[] data;
+		size = other.size;
+		data = new double[size];
+
+		for (int i = 0; i < size; i++)
+		{
+			data[i] = other.data[i];
+		}
+
+		return *this;
+	}
+
+	~Vector() 
+	{
+		delete[] data;
 	}
 
 	int Size()
 	{
-		return data.size();
+		return size;
 	}
 
 	double& Get(int i)
 	{
-		return data.at(i);
+		return data[i];
 	}
 
 	void Print()
 	{
-		for (int i = 0; i < data.size(); i++)
+		for (int i = 0; i < size; i++)
 		{
 			cout << fixed << setprecision(2) << data[i] << "\t";
 		}
@@ -38,7 +75,7 @@ public:
 
 	void FillRandom(double min, double max)
 	{
-		for (int i = 0; i < Size(); i++)
+		for (int i = 0; i < size; i++)
 		{
 			Get(i) = min + ((double)rand() / RAND_MAX) * (max - min);
 		}
@@ -48,34 +85,44 @@ public:
 class Matrix
 {
 private:
-	vector<Vector> rows;
+	Vector* rows;
+	int nRows;
+	int nCols;
 
 public:
 
-	Matrix(int nRows, int nCols)
+	Matrix(int _nRows, int _nCols)
 	{
-		rows = vector<Vector>(nRows, Vector(nCols));
+		nRows = _nRows;
+		nCols = _nCols;
+
+		rows = new Vector[nRows];
+
+		for (int i = 0; i < nRows; i++){
+			rows[i] = Vector(nCols);
+		}
 	}
 
-
-	int RowsCount()
-	{
-		return rows.size();
+	~Matrix(){
+		delete[] rows;
 	}
 
-	int ColsCount()
-	{
-		return rows.empty() ? 0 : rows[0].Size();
+	int RowsCount(){
+		return nRows;
+	}
+
+	int ColsCount(){
+		return nCols;
 	}
 
 	double& Element(int i, int j)
 	{
-		return rows.at(i).Get(j);
+		return rows[i].Get(j);
 	}
 
 	void Print()
 	{
-		for (int i = 0; i < rows.size(); i++)
+		for (int i = 0; i < nRows; i++)
 		{
 			rows[i].Print();
 		}
@@ -84,7 +131,7 @@ public:
 
 	void FillRandom(double min, double max)
 	{
-		for (int i = 0; i < RowsCount(); i++)
+		for (int i = 0; i < nRows; i++)
 		{
 			rows[i].FillRandom(min, max);
 		}
@@ -92,7 +139,7 @@ public:
 
 	Matrix Add(Matrix& other)
 	{
-		if (rows.size() != other.RowsCount() || ColsCount() != other.ColsCount())
+		if (nRows != other.RowsCount() || nCols != other.ColsCount())
 		{
 			throw invalid_argument("Matrices of different sizes!");
 		}
@@ -110,7 +157,7 @@ public:
 
 	Matrix Subtract(Matrix& other)
 	{
-		if (rows.size() != other.RowsCount() || ColsCount() != other.ColsCount())
+		if (nRows != other.RowsCount() || nCols != other.ColsCount())
 		{
 			throw invalid_argument("Matrices of different sizes!");
 		}
@@ -128,7 +175,7 @@ public:
 
 	Vector MultiplyByVector(Vector& vector)
 	{
-		if (ColsCount() != vector.Size()) 
+		if (ColsCount() != vector.Size())
 		{
 			throw invalid_argument("Matrix and vector sizes mismatch");
 		}
@@ -179,15 +226,15 @@ int main()
 	Matrix A(3, 3);
 	Matrix B(3, 3);
 
-	A.FillRandom(-2.0, 5.0);
-	B.FillRandom(-10.0, 10.0);
+	A.FillRandom(-2.0, 5.0);// matrix A value range
+	B.FillRandom(-10.0, 10.0); // matrix B value range
 
 	cout << "Matrix A:\n";
 	A.Print();
 	cout << "Matrix B:\n";
 	B.Print();
-	
-	try 
+
+	try
 	{
 		cout << "A + B:\n";
 		A.Add(B).Print();
@@ -200,8 +247,8 @@ int main()
 
 
 		Vector multiplier(A.ColsCount());
-		multiplier.FillRandom(0.0, 3.0);
-		
+		multiplier.FillRandom(0.0, 3.0); // multiplier vector value range
+
 
 		cout << "A * Vector:\n";
 		A.MultiplyByVector(multiplier).Print();
