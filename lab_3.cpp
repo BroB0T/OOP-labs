@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
@@ -35,6 +36,11 @@ public:
         return a * b;
     }
 
+    double getArea(float angle) const
+    {
+        return 1.0/2.0 * pow(getDiagonal(), 2) * sin(angle);
+    }
+
     double getPerimeter() const
     {
         return 2 * (a + b);
@@ -67,7 +73,7 @@ public:
         cout << "\tSide a: " << a << "\n";
         cout << "\tSide b: " << b << "\n";
         cout << "\tPerimeter: " << getPerimeter() << "\n";
-        cout << "\tArea: " << getArea() << "\n";
+        cout << "\tArea: " << getArea(50 * M_PI / 180) << "\n";
         cout << "\tDiagonal: " << getDiagonal() << "\n";
     }
 };
