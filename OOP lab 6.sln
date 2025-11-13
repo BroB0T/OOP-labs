@@ -1,31 +1,176 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36221.1 d17.14
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OOP lab 6", "OOP lab 6\OOP lab 6.vcxproj", "{0B8BD2EA-F2CB-49CE-ABF6-95F4608D05D8}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0B8BD2EA-F2CB-49CE-ABF6-95F4608D05D8}.Debug|x64.ActiveCfg = Debug|x64
-		{0B8BD2EA-F2CB-49CE-ABF6-95F4608D05D8}.Debug|x64.Build.0 = Debug|x64
-		{0B8BD2EA-F2CB-49CE-ABF6-95F4608D05D8}.Debug|x86.ActiveCfg = Debug|Win32
-		{0B8BD2EA-F2CB-49CE-ABF6-95F4608D05D8}.Debug|x86.Build.0 = Debug|Win32
-		{0B8BD2EA-F2CB-49CE-ABF6-95F4608D05D8}.Release|x64.ActiveCfg = Release|x64
-		{0B8BD2EA-F2CB-49CE-ABF6-95F4608D05D8}.Release|x64.Build.0 = Release|x64
-		{0B8BD2EA-F2CB-49CE-ABF6-95F4608D05D8}.Release|x86.ActiveCfg = Release|Win32
-		{0B8BD2EA-F2CB-49CE-ABF6-95F4608D05D8}.Release|x86.Build.0 = Release|Win32
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {D832F5A6-D871-445D-81CD-3F9712115C22}
-	EndGlobalSection
-EndGlobal
+#include <iostream>
+#include <stdexcept>
+#include <cmath>
+
+using namespace std;
+
+template<typename T>
+class myVector {
+private:
+    T* data;
+    int size;
+public:
+    myVector(int n) : size(n)
+    {
+        if (size < 0) throw runtime_error("Invalid size");
+
+        data = new T[size]{};
+    }
+
+    myVector(const myVector& other) : size(other.size)
+    {
+        data = new T[size];
+        for (int i = 0; i < size; i++)
+        {
+            data[i] = other.data[i];
+        }
+    }
+
+    ~myVector()
+    {
+        delete[] data;
+    }
+
+    double euclideanNorm() const
+    {
+        double sum = 0;
+        for (int i = 0; i < size; i++)
+        {
+            sum += double(data[i]) * data[i];
+        }
+        return sqrt(sum);
+    }
+
+    int minIndex() const
+    {
+        int index = 0;
+        for (int i = 1; i < size; ++i)
+        {
+            if (data[i] < data[index])
+            {
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    int maxIndex() const
+    {
+        int index = 0;
+        for (int i = 1; i < size; ++i)
+        {
+            if (data[i] > data[index])
+            {
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    void sort(bool ascending = true)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            for (int j = i + 1; j < size; j++)
+            {
+                if ((data[i] > data[j] && ascending) || (data[i] < data[j] && !ascending))
+                {
+                    T temp = data[i];
+                    data[i] = data[j];
+                    data[j] = temp;
+                }
+            }
+        }
+    }
+
+    myVector& operator=(const myVector& other)
+    {
+        if (this == &other) return *this;
+
+        delete[] data;
+        size = other.size;
+        data = new T[size];
+        for (int i = 0; i < size; ++i)
+            data[i] = other.data[i];
+
+        return *this;
+    }
+
+    T& operator[](int index)
+    {
+        if (index < 0 || index >= size) throw out_of_range("Index out of range");
+        return data[index];
+    }
+
+    myVector operator+(const myVector& other) const
+    {
+        if (size != other.size) throw runtime_error("Vectors must have same size for addition");
+
+        myVector result(size);
+        for (int i = 0; i < size; ++i)
+        {
+            result.data[i] = data[i] + other.data[i];
+        }
+        return result;
+    }
+
+    friend ostream& operator<<(ostream& os, const myVector& v)
+    {
+        os << "[";
+        for (int i = 0; i < v.size; ++i)
+        {
+            os << v.data[i];
+            if (i + 1 < v.size) os << ", ";
+        }
+        os << "]";
+        return os;
+    }
+
+    friend istream& operator>>(istream& is, myVector& v)
+    {
+        for (int i = 0; i < v.size; i++)
+        {
+            cout << i << ") ";
+            is >> v.data[i];
+
+            if (is.fail())
+            {
+                throw runtime_error("Invalid input, expected a number");
+            }
+        }
+        cout << "\n\n";
+        return is;
+    }
+};
+
+int main()
+{
+    try
+    {
+        cout << "Enter vector size: ";
+        int vectorSize;
+        cin >> vectorSize;
+
+        if (cin.fail() || vectorSize <= 0)
+        {
+            throw runtime_error("Invalid input, size must be a positive integer");
+        }
+
+        myVector<double> a(vectorSize);
+
+        cout << "Enter vector values:\n";
+        cin >> a;
+
+        cout << "A = " << a << "\n\n";
+        cout << "Min = " << a[a.minIndex()] << ", Max = " << a[a.maxIndex()] << "\n\n";
+        cout << "Euclidean norm = " << a.euclideanNorm() << "\n\n";
+
+        a.sort();
+        cout << "Sorted a = " << a << "\n";
+    }
+    catch (const exception& e)
+    {
+        cout << "Error: " << e.what() << "\nProgram terminated\n";
+        return 1;
+    }
+}
