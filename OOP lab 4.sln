@@ -1,31 +1,125 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36221.1 d17.14
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OOP lab 4", "OOP lab 4\OOP lab 4.vcxproj", "{ACB52B38-058F-418A-BE09-9898F011CD08}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{ACB52B38-058F-418A-BE09-9898F011CD08}.Debug|x64.ActiveCfg = Debug|x64
-		{ACB52B38-058F-418A-BE09-9898F011CD08}.Debug|x64.Build.0 = Debug|x64
-		{ACB52B38-058F-418A-BE09-9898F011CD08}.Debug|x86.ActiveCfg = Debug|Win32
-		{ACB52B38-058F-418A-BE09-9898F011CD08}.Debug|x86.Build.0 = Debug|Win32
-		{ACB52B38-058F-418A-BE09-9898F011CD08}.Release|x64.ActiveCfg = Release|x64
-		{ACB52B38-058F-418A-BE09-9898F011CD08}.Release|x64.Build.0 = Release|x64
-		{ACB52B38-058F-418A-BE09-9898F011CD08}.Release|x86.ActiveCfg = Release|Win32
-		{ACB52B38-058F-418A-BE09-9898F011CD08}.Release|x86.Build.0 = Release|Win32
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {934124BB-F3CB-4A33-A2B5-99D12D82908B}
-	EndGlobalSection
-EndGlobal
+#define _USE_MATH_DEFINES
+#include <iostream>
+#include <fstream>
+#include <cmath>
+
+using namespace std;
+
+class Circle
+{
+protected:
+	double radius;
+public:
+	Circle(double r = 0) : radius(r) {}
+
+	double area() const
+	{
+		return M_PI * pow(radius, 2);
+	}
+
+	double circleLength() const
+	{
+		return M_PI * radius * 2;
+	}
+
+	void printInfo(ostream& os) const
+	{
+		os << "\nCircle:";
+		os << "\nradius: " << radius;
+		os << "\narea: " << area();
+		os << "\ncircle length: " << circleLength();
+	}
+};
+
+class RightTriangle
+{
+protected:
+	double a;
+	double b;
+
+public:
+	RightTriangle(double a = 0, double b = 0) : a(a), b(b) {}
+
+	double area() const
+	{
+		return a * b;
+	}
+
+	double perimeter() const
+	{
+		return a + b + sqrt(pow(a, 2) + pow(b, 2));
+	}
+
+	double hypotenuse() const
+	{
+		return sqrt(pow(a, 2) + pow(b, 2));
+	}
+
+	void printInfo(ostream& os) const
+	{
+		os << "\n\nRightTriangle:";
+		os << "\nlegs of triangle: " << a << ", " << b;
+		os << "\narea: " << area();
+		os << "\nperimeter: " << perimeter();
+		os << "\nhypotenuse: " << hypotenuse();
+	}
+};
+
+class InscribedRightTriangle : RightTriangle, Circle
+{
+public:
+	InscribedRightTriangle(double a = 0, double b = 0) :
+		RightTriangle(a, b), 
+		Circle(sqrt(pow(a, 2) + pow(b, 2) / 2.0)) {}
+
+	void printInfo(ostream& os) const
+	{
+		os << "Inscribed Right Triangle \n";
+		RightTriangle::printInfo(os);
+		Circle::printInfo(os);
+		os << "\n";
+	}
+};
+
+int main()
+{
+	double a;
+	double b;
+
+	cout << "Enter legs of a triangle";
+	
+	try
+	{
+		cout << "\na = ";
+		cin >> a;
+		if (a <= 0) throw runtime_error("invalid input");
+
+		cout << "\nb = ";
+		cin >> b;
+		if (b <= 0) throw runtime_error("invalid input");
+	}
+	catch(runtime_error& error)
+	{
+		cout << "Error: " << error.what();
+		return 0;
+	}
+
+	InscribedRightTriangle triangle(a, b);
+
+	triangle.printInfo(cout);
+
+
+	ofstream fout("D:\\newFile.txt");
+	if (fout.is_open())
+	{
+		triangle.printInfo(fout);
+		fout.close();
+		cout << "\nInformation written to file";
+	}
+	else
+	{
+		cout << "\nError opening file!";
+	}
+
+	return 0;
+}
